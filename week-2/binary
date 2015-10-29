@@ -1,0 +1,22 @@
+#lang racket
+(define (string-reverse str)
+  (define (helper i res)
+     (if (< i 0)
+         res
+         (helper (- i 1) (string-append res (~a(string-ref str i))))))
+  (helper (- (string-length str) 1) ""))
+
+(define (to-binary-string n)
+  (define (helper bi res )
+    (cond
+      [(= bi 0) res]
+      [(= (remainder bi 2) 0) (helper (quotient bi 2) (string-append res (~a "0")))]        
+      [(= (remainder bi 2) 1) (helper (quotient bi 2) (string-append res (~a "1")))]))
+  (string-reverse (helper n "" )))
+
+(define (from-binary-string binary-str)
+  (define (helper mult n i res)
+    (cond
+    [(= (string-length binary-str) i) res]
+    [ else (helper (* mult 2) n (+ i 1) (+ (* (string->number (~a (string-ref n i))) mult) res))]))
+  (helper 1 (string-reverse binary-str) 0 0))
