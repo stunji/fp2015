@@ -1,0 +1,115 @@
+#lang racket
+
+; Намира сумата на всички числа в numbers
+(define (sum numbers)
+  (cond
+    [(empty? numbers) 0]
+    [(+ (first numbers) (sum (rest numbers)))]))
+
+; Проверява дали x се среща в items
+(define (member? x items)
+  (cond
+    [(empty? items) #f]
+    [(equal? x (first items)) #t]
+    [(member? x (rest items))]))
+
+(define (length2 items)
+  (define (helper i items)
+    (cond
+      [(empty? items) i]
+      [(helper (+ i 1) (rest items))]))
+  (helper 0 items))
+
+; Връща n-тия елемент от items при 0лево базиран индекс
+(define (list-ref2 items n)
+  (define (iter i xs)
+    (cond
+      [(= i n) (first xs)]
+      [else (iter (+ i 1) (rest xs))]))
+  (iter 0 items))
+    
+
+(define (range2 a b)
+  (cond
+    [(>= a b) (list)]
+    [else (cons a (range2 (+ a 1) b))]))
+
+(define (build-list2 n f)
+  (define (iter i)
+    (cond
+      [(> i n) (list)]
+      [else (cons (f i) (iter (+ 1 i)))]))
+  (iter 0))
+
+; В Racket има такава фунцкия, наречена append
+(define (append2 l1 l2)
+  (define (iter i l2)
+    (cond
+      [(< i 0) l2]
+      [else (iter (- i 1) (cons (list-ref l1 i) l2))]))
+  (iter (- (length l1) 1) l2))
+
+; Обръща списъка наобратно
+(define (reverse2 items)
+  (define (iter i n items)
+    (cond
+      [(> i (- (length items) 1)) n]
+      [else (iter (+ i 1) (cons (list-ref items i) n) items)]))
+  (iter 0 (list) items))
+
+; Взима първите n елемента от даден списък
+(define (take2 n items)
+  (define (iter i l)
+    (cond
+      [(> n (length items)) items]
+      [(= i  n) l]
+      [else (iter (+ i 1) (cons (list-ref items i) l))]))
+  (reverse2 (iter 0 (list))))
+
+; Маха първите n елемента от даден списък
+(define (drop2 n items)
+  (define (iter i l)
+    (cond
+      [(> n (length items)) (list)]
+      [(= i n) l]
+      [else (iter (+ i 1) (rest l))]))
+  (iter 0 items))
+
+; Функция от по-висок ред. Взима поредни елементи от items докато предиката p за тях дава истина
+(define (take-while p items)
+  (define (iter l n)
+    (cond
+      [(p (first n)) (iter (cons (first n) l) (rest n))]
+      [else l]))
+  (reverse (iter (list) items)))
+
+
+; Функция от по-висок ред. Маха поредните елементи от items докато предикатa p дава истина за тях
+(define (drop-while p items)
+    (cond
+      [(p (first items)) (drop-while p (rest items))]
+      [else items]))
+
+; Функцията взима число и връща списък от цифрите му
+(define (number->list n)
+  (define (helper i res)
+   (cond
+    [(= 0 i) res]
+    [else (helper (quotient i 10) (cons (remainder i 10) res))]))
+  (helper n (list)))
+
+; Функцията взима списък от цифри и връща числото
+(define (list->number1 ns)
+  (define (iter i num l)
+    (cond
+      [(< i 0) num]
+      [else (iter (- i 1) (+ num (* (first l) (expt 10 i))) (rest l))]))
+  (iter (- (length ns) 1) 0 ns))
+
+; Функцията взима списък от цифри и връща числото със стрингове става и за двуцифрени числа в списъка
+(define (list->number2 ns)
+  (define (iter i res)
+    (cond
+      [(> i (- (length ns) 1)) res]
+      [else (iter (+ i 1) (string-append res (number->string (list-ref ns i))))]))
+    (string->number (iter 0 "")))
