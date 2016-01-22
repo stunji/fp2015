@@ -1,7 +1,5 @@
 #lang racket
 
-(require "tree.rkt")
-
 (define (bst-insert x tree)
   (cond [(empty-tree? tree) (make-leaf x)]
         [(< x (root tree)) (make-tree (root tree) (bst-insert x (left tree)) (right tree))]
@@ -21,3 +19,18 @@
   (cond [(leaf? tree) #t]
         [(or (> (root tree) (root (right tree))) (< (root tree) (root (left tree)))) #f]
         [else (and (bst? (left tree)) (bst? (right tree)))]))
+
+(define (tree-level level tree)
+  (cond [(empty-tree? tree) '()]
+        [(<= level 1) (list (root tree))]
+        [else (append (tree-level (- level 1) (left tree)) (tree-level (- level 1) (right tree)))]))
+
+(define (tree-levels tree)
+  (define (helper level)
+    (cond [(> level (height t)) '()]
+          [else (cons (tree-level level tree) (helper (+ level 1)))]))
+  (helper 1))
+
+(define (tree-map f tree)
+  (cond [(empty-tree? tree) '()]
+        [else (make-tree (f (root tree)) (tree-map f (left tree)) (tree-map f (right tree)))]))
