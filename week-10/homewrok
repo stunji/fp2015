@@ -1,0 +1,47 @@
+truncatablePrime :: Int -> Bool
+truncatablePrime n
+    | n < 10    = isPrime n
+    | otherwise = isPrime n && truncatablePrime (div n 10)
+        where
+            isPrime :: Int -> Bool
+            isPrime n
+                | n <= 1    = False
+                | otherwise = isPrime' 2 n
+                    where
+			isPrime' :: Int -> Int -> Bool
+                        isPrime' current n
+                            | current == n = True
+                            | mod n current == 0 = False
+                            | otherwise = isPrime' (current + 1) n
+  
+  containsDigits :: Int -> Int -> Bool
+containsDigits a b
+    | b < 10 = contain a b
+    | otherwise contain a (mod b 10) && contain a (div b 10)
+	where
+	    contain :: Int -> Int -> Bool
+	    contain n m
+		| n < 10 = n == m
+		|otherwise = m == (mod n 10) || contain (div n 10) m
+
+productOfDigits :: Int -> Int
+productOfDigits n
+    | n < 10 = n
+    | otherwise = (mod n 10) * productOfDigits (div n 10)
+
+interestingNumber :: Int -> Bool
+interestingNumber n = n == sumOfDels (sumOfDels n 1) 1
+    where
+	sumOfDels :: Int -> Int -> Int
+	sumOfDels a i
+	    | i > div a 2 = 0
+	    | mod a i == 0 = i + sumOfDels a (i + 1)
+	    |otherwise = sumOfDels a (i + 1)
+
+quadrant :: Double -> Double -> Int
+quadrant 0 0 = 0
+quadrant a b
+    | a > 0 && b > 0 = 1
+    | a > 0 && b < 0 = 4
+    | a < 0 && b > 0 = 2
+    | otherwise = 3
