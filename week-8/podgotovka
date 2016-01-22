@@ -1,0 +1,213 @@
+#lang racket
+
+; Zadacha 1
+(define (prime? n)
+  (define (iter i)
+    (cond
+      [(> i (sqrt n)) #t]
+      [(= 0 (remainder n i)) #f]
+      [else (iter (+ i 1))]))
+  (iter 2))
+
+(define (truncatable-prime? x)
+  (cond
+    [(= x 0) #t]
+    [(not (prime? x)) #f]
+    [else (truncatable-prime? (quotient x 10))]))
+
+; Zadacha interesting chislo
+(define (sum-divisors n)
+  (define (sum-iter i result)
+    (cond [(>= i n) result]
+          [(= (remainder n i) 0) (sum-iter (+ i 1) (+ result i))]
+          [else (sum-iter (+ i 1) result)]))
+  (sum-iter 1 0))
+
+(define (interesting? n)
+    (= n (sum-divisors (sum-divisors n))))
+
+(define (sum-interesting limit)
+  (define (iter i res)
+    (cond
+      [(> i limit) res]
+      [(interesting? i) (iter (+ i 1) (+ i res))]
+      [else (iter (+ i 1) res)]))
+  (iter 1 0))
+
+;Zadacha posledovatelno izpylnenie na predikati
+(define (where list-elements list-predicates)
+  (define (iter res i)
+    (cond
+      [(> i (- (length list-predicates) 1)) res]
+      [else (iter (filter (list-ref list-predicates i) res) (+ i 1))]))
+  (iter list-elements 0))
+
+; Zadacha nulevi redove
+(define (has-zero? l)
+  (cond
+    [(empty? l) #f]
+    [(= (first l) 0) #t]
+    [else (has-zero? (rest l))]))
+
+(define (makezero l)
+  (define (iter i res)
+    (if (> i (- (length l) 1))
+        res
+        (iter (+ i 1) (cons 0 res))))
+  (iter 0 '()))
+
+(define (zero matrix)
+  (define (iter l res)
+    (cond
+      [(empty? l) res]
+      [(has-zero? (first l)) (iter (rest l) (cons (makezero (first l)) res))]
+      [else (iter (rest l) (cons (first l) res))]))
+  (reverse (iter matrix '())))
+
+;Zadacha s permutacii
+(define (number->list n)
+  (define (helper i res)
+    (cond
+      [(= i 0) res]
+      [else (helper (quotient i 10) (cons (remainder i 10 ) res))]))
+  (helper n (list)))
+
+(define (comparator n m)
+  (define (iter ns ms)
+    (cond
+      [(and (empty? ms) (empty? ns)) #t]
+      [(list? (member (first ns) ms)) (iter (rest ns) (remove (first ns) ms))]
+      [else #f]))
+  (iter (number->list n) (number->list m) ))
+    
+
+(define (all-permutations? items)
+  (cond
+    [(empty? (rest items)) #t]
+    [(comparator (first items) (second items)) (all-permutations? (rest items))]
+    [else #f]))
+
+
+
+;Zadacha s 1 - 9 sbor ot chisla
+(define (maxNum n) ;limit
+  (define (iter i res)
+    (if (= i n)
+        res
+        (iter (+ i 1) (+ (* res 10) 1))))
+  (iter 0 0))
+
+(define (digSum n) ;suma na cifri
+  (define (iter n res)
+    (cond
+      [(= n 0) res]
+      [(iter (quotient n 10) (+ (remainder n 10) res))]))
+  (iter n 0))
+
+(define (containZero n) ; ima nula?
+  (define (iter n)
+    (cond
+      [(zero? n) #f]
+      [(zero? (remainder n 10)) #t]
+      [else (iter (quotient n 10))]))
+  (if (zero? n)
+      #t
+  (iter n )))
+
+(define (digits-sum n)
+(define (iter start end res)
+  (cond
+    [(or (< n 1) (> n 9)) 0]
+    [(> start end) res]
+    [(and (not (containZero start)) (= n (digSum start))) (iter (+ 1 start ) end (+ res start))]
+    [else (iter (+ 1 start) end res)]))
+  (iter 1 (maxNum n) 0))
+
+;repeater
+(define (string-repeat str n)
+  (define (help i res)
+    (if (= i n)
+        res
+        (help (+ i 1) (string-append res str))))
+  (help 0 ""))
+
+(define (repeater str)
+  (lambda (count glue)
+    (string-append str (string-repeat (string-append glue str) (- count 1)))))
+
+;Cycle and shits
+(define (cycle times items)
+  (define (iter i result)
+    (if (> i times) result
+        (iter (+ 1 i) (cons (first (reverse result)) (reverse (cdr (reverse result)))))))
+  (lambda (x) (list-ref (iter 1 items) (remainder x (length items)))))
+
+;Dobavqne na oshte chasti ot matricata
+(define (duplicate matrix)
+  (define (iter matrix res)
+    (cond
+      [(empty? matrix) res]
+      [(iter (rest matrix) (cons (append (first matrix) (reverse (cdr (reverse (first matrix))))) res))]))
+  (reverse (iter matrix '())))
+
+;   Jenata: shtoto si nqmam druga rabota.
+;   Az: mi i az.
+(define (determinant matrix)
+  (define (helper matrix)
+    (- (+ (*(first (first matrix)) (first(rest (first ( rest matrix)))) (first (rest (rest (first (rest (rest matrix)))))))
+          (* (first (rest (first matrix))) (first (rest (rest (first (rest matrix))))) (first (rest (rest (rest (first(rest(rest matrix))))))))
+          (* (first (rest (rest (first matrix)))) (first (rest (rest (rest (first (rest matrix)))))) (first (rest (rest(rest (rest (first(rest(rest matrix))))))))))
+       (+  (* (first (rest (rest (first matrix)))) (first(rest (first (rest matrix)))) (first(first(rest(rest matrix)))))
+           (* (first (rest (rest(rest (first matrix))))) (first(rest(rest (first (rest matrix))))) (first(rest(first(rest(rest matrix))))))
+           (* (first (rest (rest(rest(rest (first matrix)))))) (first(rest(rest(rest (first (rest matrix)))))) (first(rest(rest(first(rest(rest matrix))))))))))
+  (helper (duplicate matrix)))
+
+; Posledno uprajnenie
+(define (sum ns)
+  (apply + ns))
+
+(define (zip-with f xs ys)
+  (map f xs ys))
+
+(define (zip xs ys)
+  (zip-with cons xs ys))
+
+(define (enumerate l)
+  (zip-with list (range 0 (length l)) l))
+
+(define (back-enumerate l)
+  (zip-with list (range (- (length l) 1) -1 -1) l))
+
+(define (row index matrix)
+  (list-ref matrix index))
+
+(define (column index matrix)
+  (map (lambda (row)
+         (list-ref row index))
+       matrix))
+
+(define (main-diagonal matrix)
+  (map (lambda (enum-row)
+         (list-ref (second enum-row) (first enum-row)))
+       (enumerate matrix)))
+
+(define (sum-matrix matrix)
+  (sum (map sum matrix)))
+
+(define (cartesian-product xs ys)
+  (map (lambda (x)
+         (map (lambda (y)
+                (cons x y))
+              ys))
+       xs))
+
+(define (second-diagonal matrix)
+  (map (lambda (enum-row)
+         (list-ref (second enum-row) (first enum-row)))
+       (back-enumerate matrix)))
+
+(define matrix
+  '((1 2 3)
+    (4 5 6)
+    (7 8 9)))
+
