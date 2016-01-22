@@ -1,0 +1,34 @@
+#lang racket
+
+(define (drop-while p items)
+  (cond [(null? items) '()]
+        [(not (p (first items))) items]
+        [else (drop-while p (rest items))]))
+
+(define (take-while p items)
+  (cond [(null? items) '()]
+        [(not (p (first items))) '()]
+        [else (cons (first items) (take-while p (rest items)))]))
+
+(define (group l)
+(cond
+[(empty? l) '()]
+[else (cons  (take-while (lambda (x) (equal? x (car l))) l)   (group (drop-while (lambda (x) (equal? x (car l))) l)))]))
+
+(define (run-length-encode str)
+  (define (run-lenght-encode-help l)
+  (cond
+    [(empty? l) ""]
+    [(= 1 (length (car l))) (string-append (~a (caar l)) (run-lenght-encode-help (cdr l)) ) ]
+    [else (string-append (number->string (length (car l)))  (~a (caar l)) (run-lenght-encode-help (cdr l)))]))
+  (run-lenght-encode-help (group(string->list str))))
+
+(define(run-length-decode str)
+  (define l (string-length str))
+  (define(run-length-decode-help str i read)
+  (cond
+  [(= i l) ""]
+  [(and (= 0 read) (not(string->number(~a(string-ref str i))))) (string-append (~a(string-ref str i)) (run-length-decode-help str (+ 1 i) 0))]
+  [(string->number (~a(string-ref str i))) (run-length-decode-help str (+ 1 i) (+(* read 10) (string->number (~a(string-ref str i)))))]
+  [else(string-append  (string-repeat (~a(string-ref str i)) read) (run-length-decode-help str (+ 1 i) 0 ))]))
+  (run-length-decode-help str 0 0))
